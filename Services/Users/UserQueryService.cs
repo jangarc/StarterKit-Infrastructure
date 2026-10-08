@@ -13,9 +13,9 @@ namespace Infrastructure.Services.Users;
 public class UserQueryService : IUserQueryService
 {
     private readonly IApplicationDbContext _context;
-    private readonly UserMapper _mapper;
+    private readonly IUserMapper _mapper;
 
-    public UserQueryService(IApplicationDbContext context, UserMapper mapper)
+    public UserQueryService(IApplicationDbContext context, IUserMapper mapper)
     {
         _context = context;
         _mapper = mapper;
