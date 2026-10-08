@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Infrastructure.Common;
+﻿namespace Infrastructure.Common;
 
 public static class BaseConfig
 {

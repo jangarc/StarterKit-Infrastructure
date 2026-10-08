@@ -2,10 +2,11 @@
 using Application.Features.Users.Queries;
 using Application.Interfaces;
 using Application.Interfaces.Users;
+using Domain.Entities;
+using Domain.Specifications;
 using Domain.Specifications.Users;
 using Infrastructure.Mapping.Users;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Infrastructure.Services.Users;
 
@@ -21,21 +22,33 @@ public class UserQueryService : IUserQueryService
     }
 
     /// <inheritdoc/>
-    public async Task<UserDto?> GetUserByIdAsync(GetUserQuery query, CancellationToken cancellationToken = default)
+    public async Task<UserDto?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var spec = new UserByIdSpecification(query.UserId);
+        var spec = new UserByIdSpecification(userId);
 
-        //var userDto = await _context.Users
-        //    .Where(spec.ToExpression())
-        //    .Select(u => new UserDto(u.Id, u.Name, u.AliasName, u.Birthday,
-        //        u.Account, u.Email,
-        //        u.TenantId, u.Tenant.Name, u.CreateUserId, u.CreateUser.Name,
-        //        u.UpdateUserId, u.UpdateUser.Name))
-        //    .FirstOrDefaultAsync(cancellationToken);
         var userDto = await _mapper.UserToDto(_context.Users.Where(spec.ToExpression()))
             .FirstOrDefaultAsync(cancellationToken);
 
         return userDto;
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<UserDto>> QueryUserAsync(SearchUsersQuery query, CancellationToken cancellationToken = default)
+    {
+        ISpecification<User> spec = new UserTenantSpecification(query.TenantId);
+
+        if (!string.IsNullOrWhiteSpace(query.Keyword))
+            spec = spec.And(new UserByKeywordSpecification(query.Keyword));
+
+        if (query.Birthday.HasValue)
+            spec = spec.And(new UserByBithdayRangeSpecification(query.Birthday));
+        else if (query.StartBirthdayRange.HasValue || query.EndBirthdayRange.HasValue)
+            spec = spec.And(new UserByBithdayRangeSpecification(query.StartBirthdayRange, query.EndBirthdayRange));
+
+        var userDtoList = await _mapper.UserToDto(_context.Users.Where(spec.ToExpression()))
+            .ToListAsync(cancellationToken);
+
+        return userDtoList;
     }
 
 }
