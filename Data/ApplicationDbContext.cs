@@ -1,4 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// Copyright (C) 2026 <CHANG,SHIH-HSIN/Arc Studio>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY
+using Microsoft.EntityFrameworkCore;
 using Application.Interfaces;
 using Domain.Entities;
 using Casbin.Persist.Adapter.EFCore;
@@ -40,14 +49,19 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             builder.HasIndex(u => u.Name)
                .IsUnique();
 
-            builder.HasOne(u => u.CreateUser)
+            builder.HasOne(u => u.CreatedUser)
                .WithMany()
-               .HasForeignKey(u => u.CreateUserId)
+               .HasForeignKey(u => u.CreatedId)
                .OnDelete(DeleteBehavior.ClientNoAction);
 
-            builder.HasOne(u => u.UpdateUser)
+            builder.HasOne(u => u.LastModifiedUser)
                 .WithMany()
-                .HasForeignKey(u => u.UpdateUserId)
+                .HasForeignKey(u => u.LastModifiedId)
+                .OnDelete(DeleteBehavior.ClientNoAction);
+
+            builder.HasOne(u => u.DeletedUser)
+                .WithMany()
+                .HasForeignKey(u => u.DeletedId)
                 .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.HasOne(u => u.Tenant)
@@ -62,14 +76,19 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             builder.HasKey(o => o.Id);
             builder.Property(o => o.Id).HasColumnType("uuid");
 
-            builder.HasOne(u => u.CreateUser)
+            builder.HasOne(u => u.CreatedUser)
                .WithMany()
-               .HasForeignKey(u => u.CreateUserId)
+               .HasForeignKey(u => u.CreatedId)
                .OnDelete(DeleteBehavior.ClientNoAction);
 
-            builder.HasOne(u => u.UpdateUser)
+            builder.HasOne(u => u.LastModifiedUser)
                 .WithMany()
-                .HasForeignKey(u => u.UpdateUserId)
+                .HasForeignKey(u => u.LastModifiedId)
+                .OnDelete(DeleteBehavior.ClientNoAction);
+
+            builder.HasOne(u => u.DeletedUser)
+                .WithMany()
+                .HasForeignKey(u => u.DeletedId)
                 .OnDelete(DeleteBehavior.ClientNoAction);
         });
     }
